@@ -1,10 +1,12 @@
 package com.koreait.SpringSecurityStudy.config;
 
 
+import org.springframework.boot.autoconfigure.jms.JmsProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
@@ -37,7 +39,21 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.cors(Customizer.withDefaults());
-
+        http.cors(csrf -> csrf.disable());
+        // 사용자가 의도하지 않은 요청을 공격자가 서버에 전달하도록 하는 공격(해킹=공격)
+        // 세션이 없고, 쿠키도 안쓰고, 토튼 기반이기때문
+        // 서버사이드 렌더링 로그인 방식 비활성화
+        http.formLogin(formLogin -> formLogin.disable());
+        http.httpBasic(httpBasic -> httpBasic.disable());
+        // 서버 사이드 방식 로그인 방식 비활성화
+        http.logout(logout -> logout.disable());
+        http.sessionManagement(Session -> Session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
+        //특정 요청에 대한 권한 설정
+        http.authorizeHttpRequests(auth -> {
+//            auth.requestMatchers("").permitAll();
+            auth.anyRequest().authenticated();
+        });
+        return http.build();
     }
 
 }
