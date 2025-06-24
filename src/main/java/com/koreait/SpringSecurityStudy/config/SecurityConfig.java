@@ -1,19 +1,30 @@
 package com.koreait.SpringSecurityStudy.config;
 
 
+import com.koreait.SpringSecurityStudy.security.filter.JwtAuthenticationFilter;
+import org.apache.catalina.User;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.jms.JmsProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 @Configuration
 public class SecurityConfig {
+
+    @Autowired
+    private JwtAuthenticationFilter jwtAuthenticationFilter;
+
+    BCryptPasswordEncoder bCryptPasswordEncoder = new BCryptPasswordEncoder();
+    }
 
     // 기본적으로 브라우저는 같은 출처만 허용한다.
     // 브라우저가 보안상 다른 도메인의 리소스 요청을 제한하는 정책
@@ -29,9 +40,6 @@ public class SecurityConfig {
         corsConfiguration.addAllowedMethod(CorsConfiguration.ALL);
 
 
-        // 요청을 URL 에 대한  CORS 설정을 적용을 위해 객체
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        //모든 URL("/**")에 대한 정책을 허용한다.
         source.registerCorsConfiguration("/**",corsConfiguration);
         return source;
     }
@@ -47,13 +55,18 @@ public class SecurityConfig {
         http.httpBasic(httpBasic -> httpBasic.disable());
         // 서버 사이드 방식 로그인 방식 비활성화
         http.logout(logout -> logout.disable());
-        http.sessionManagement(Session -> Session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
+        http.sessionManagement(        // 요청을 URL 에 대한  CORS 설정을 적용을 위해 객체
+                UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        //모든 URL("/**")에 대한 정책을 허용한다.
+        Session -> Session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
+
+        http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
         //특정 요청에 대한 권한 설정
         http.authorizeHttpRequests(auth -> {
-//            auth.requestMatchers("").permitAll();
+            auth.requestMatchers("/auth/test").permitAll();
             auth.anyRequest().authenticated();
         });
         return http.build();
+        //인증 컽레스트에 인증 객체 저장 -> 인증 실패든 성공이든 필터링을 중단하지 않고 다음 플터로 넘어감
     }
-
 }
