@@ -1,9 +1,8 @@
 package com.koreait.SpringSecurityStudy.dto;
 
-import com.koreait.SpringSecurityStudy.entity.UserEntity;
+import com.koreait.SpringSecurityStudy.entity.User;
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import org.springframework.boot.autoconfigure.security.SecurityProperties;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 @Data
@@ -13,12 +12,11 @@ public class SignupReqDto {
     private String password;
     private String email;
 
-    public UserEntity toEntity(BCryptPasswordEncoder cryptPasswordEncoder) {
-        return UserEntity.builder()
+    public User toEntity(BCryptPasswordEncoder bCryptPasswordEncoder) {
+        return User.builder()
                 .username(this.username)
-                .password(BCryptPasswordEncoder.encode(this.password))
+                .password(bCryptPasswordEncoder.encode(this.password))
                 .email(this.email)
                 .build();
-
     }
 }
