@@ -5,12 +5,18 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class roleEntity {
+public class UserRole {
+    private Integer userRoleId;
+    private Integer userId;
     private Integer roleId;
-    private String rolename;
-    private String rolenameKor;
+    private LocalDateTime createDt;
+    private LocalDateTime updateDt;
+
+    private Role role;
 }

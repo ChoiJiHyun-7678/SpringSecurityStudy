@@ -43,12 +43,13 @@ public class JwtAuthenticationFilter implements Filter {
         if(jwtUtil.isBearer(authorization)) {
             String accessToken = jwtUtil.removeBearer(authorization);
             try {
-                 claims = jwtUtil.getClaims(accessToken);
+                Claims claims = jwtUtil.getClaims(accessToken);
                 //토큰에서 Claims를 추출
                 //이때 서명검증도 같이 진행
                 //서명 위조나 만료 시 예외 발생
                 String id = claims.getId();
                 //UserDetailsService
+
                 Integer userId = Integer.parseInt(id);
                 Optional<User> optionalUser = userRepository.getUserByUserId(userId);
                 optionalUser.ifPresentOrElse((user) -> {
@@ -59,6 +60,7 @@ public class JwtAuthenticationFilter implements Filter {
                             .username(user.getUsername())
                             .password(user.getPassword())
                             .email(user.getEmail())
+                            .userRoles(user.getUserRoles())
                             .build();
                     //UsernamePasswordAuthenticationToken 직접 생성
                     Authentication authentication = new UsernamePasswordAuthenticationToken(principalUser, "", principalUser.getAuthorities());
